@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Get My Maps</string>
+    <string name="title_activity_display_maps">DisplayMapsActivity</string>
 </resources>
