@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.getmymaps.adapter.MapsAdapter
 import com.example.getmymaps.databinding.ActivityMainBinding
@@ -14,8 +16,24 @@ import com.example.getmymaps.models.UserMap
 import java.io.Serializable
 
 const val EXTRA_USER_MAP = "EXTRA_USER_MAP"
+const val TITLE_STRING = "TITLE_STRING"
+private const val REQUEST_CODE = 1234
 class MainActivity : AppCompatActivity() {
     private lateinit var binding : ActivityMainBinding
+
+    //startactivityforresults alternative
+    val startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult(),
+        ActivityResultCallback { result ->
+            if(result!=null && result.resultCode == RESULT_OK){
+                if(result.data != null ){
+
+                }
+
+            }
+
+        })
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -38,7 +56,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         )
+
+        binding.fabCreateMap.setOnClickListener{
+            Log.i(TAG, "onCreate: TAPPING ON FAB")
+            val intent = Intent(this@MainActivity, CreateMapsActivity::class.java)
+            intent.putExtra(TITLE_STRING,"HELLO!")
+            startForResult.launch(intent)
+
+        }
     }
+
 }
 
 private fun generateSampleData(): List<UserMap> {

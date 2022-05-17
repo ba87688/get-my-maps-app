@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Get My Maps</string>
     <string name="title_activity_display_maps">DisplayMapsActivity</string>
+    <string name="title_activity_create_maps">CreateMapsActivity</string>
 </resources>

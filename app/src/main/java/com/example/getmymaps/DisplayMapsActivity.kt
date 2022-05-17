@@ -29,6 +29,8 @@ class DisplayMapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
 
+        supportActionBar?.title = userMap.title
+
         userMap = intent.getSerializableExtra(EXTRA_USER_MAP) as UserMap
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
