@@ -1,6 +1,9 @@
 package com.example.getmymaps
 
+import android.app.Activity
+import android.content.ContentValues.TAG
 import android.content.DialogInterface
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -19,6 +22,8 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.example.getmymaps.databinding.ActivityCreateMapsBinding
+import com.example.getmymaps.models.Place
+import com.example.getmymaps.models.UserMap
 import com.google.android.gms.maps.model.Marker
 import com.google.android.material.snackbar.Snackbar
 
@@ -35,7 +40,7 @@ class CreateMapsActivity : AppCompatActivity(), OnMapReadyCallback {
         binding = ActivityCreateMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        supportActionBar?.title = intent.getStringExtra("ya")
+        supportActionBar?.title = intent.getStringExtra(EXTRA_MAP_TITLE)
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
@@ -104,9 +109,25 @@ class CreateMapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     }
 
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if(item.itemId == R.id.save_menu_button){
-
+            Log.i(TAG, "onOptionsItemSelected: save button clicked.")
+            //if list is empty, dont let them save because they can't
+            if(markers.isEmpty()){
+                Toast.makeText(this, "There has to be at least one marker to save", Toast.LENGTH_LONG).show()
+                return true
+            }
+            val places = markers.map { marker ->
+                Place(marker.title,marker.snippet,marker.position.latitude, marker.position.longitude)
+            }
+            val name = intent.getStringExtra(EXTRA_MAP_TITLE)
+            val userMap = UserMap(name.toString(),places)
+            val data = Intent()
+            data.putExtra(EXTRA_USER_MAP,userMap)
+            setResult(Activity.RESULT_OK,data)
+            finish()
+            return true
         }
         return super.onOptionsItemSelected(item)
     }

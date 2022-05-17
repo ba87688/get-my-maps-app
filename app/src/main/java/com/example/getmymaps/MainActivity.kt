@@ -1,11 +1,14 @@
 package com.example.getmymaps
 
+import android.app.Activity
 import android.content.ContentValues.TAG
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,6 +19,7 @@ import com.example.getmymaps.models.UserMap
 import java.io.Serializable
 
 const val EXTRA_USER_MAP = "EXTRA_USER_MAP"
+const val EXTRA_MAP_TITLE = "EXTRA_MAP_TITLE"
 const val TITLE_STRING = "TITLE_STRING"
 private const val REQUEST_CODE = 1234
 class MainActivity : AppCompatActivity() {
@@ -60,10 +64,20 @@ class MainActivity : AppCompatActivity() {
         binding.fabCreateMap.setOnClickListener{
             Log.i(TAG, "onCreate: TAPPING ON FAB")
             val intent = Intent(this@MainActivity, CreateMapsActivity::class.java)
-            intent.putExtra(TITLE_STRING,"HELLO!")
-            startForResult.launch(intent)
+            intent.putExtra(EXTRA_MAP_TITLE,"New Map Game!")
+//            startForResult.launch(intent)
+            startActivityForResult(intent, REQUEST_CODE)
 
         }
+    }
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if(requestCode== REQUEST_CODE && resultCode == Activity.RESULT_OK){
+            var userMap = data?.getSerializableExtra(EXTRA_USER_MAP) as UserMap
+            Log.i(TAG, "onActivityResult: ${userMap.title}")
+        }
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
 }
