@@ -1,10 +1,14 @@
 package com.example.getmymaps
 
+import android.Manifest
 import android.app.Activity
 import android.content.ContentValues.TAG
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Camera
+import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
@@ -29,9 +33,22 @@ import com.example.getmymaps.models.UserMap
 import com.google.android.gms.maps.model.Marker
 import com.google.android.material.snackbar.Snackbar
 import android.os.SystemClock
+import android.util.AttributeSet
+import android.view.View
 
 import android.view.animation.BounceInterpolator
 import android.view.animation.Interpolator
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices.getFusedLocationProviderClient
+import androidx.annotation.NonNull
+import androidx.core.app.ActivityCompat
+
+import com.google.android.gms.tasks.OnFailureListener
+
+import com.google.android.gms.tasks.OnSuccessListener
+
+
+
 
 
 class CreateMapsActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -47,6 +64,50 @@ class CreateMapsActivity : AppCompatActivity(), OnMapReadyCallback {
         binding = ActivityCreateMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.currentLocationFab.setOnClickListener { it->
+            Log.i(TAG, "onCreateView: you clicked on my current location")
+            val locationClient: FusedLocationProviderClient = getFusedLocationProviderClient(this)
+
+
+            //CHECING IF PERMISSSIONS ARE GRANTED.
+            if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return@setOnClickListener
+            }
+            //if permission are given, get location.
+            locationClient.lastLocation
+                .addOnSuccessListener { location -> // GPS location can be null if GPS is switched off
+                    location?.let { it->
+                        Log.i(TAG, "onCreate: THE LOCATION IS: $it" )
+                        val lat = it.latitude
+                        val log = it.longitude
+                        val pos = LatLng(lat, log)
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(pos,10f))
+                        onLocationChanged(it) }
+                }
+                .addOnFailureListener { e ->
+                    Log.d("MapDemoActivity", "Error trying to get last GPS location")
+                    e.printStackTrace()
+                }
+
+            Log.i(TAG, "onCreate: $locationClient")
+
+
+            //END OF FAB
+        }
         //get user input from the dialogue bar
         supportActionBar?.title = intent.getStringExtra(EXTRA_MAP_TITLE)
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -60,6 +121,22 @@ class CreateMapsActivity : AppCompatActivity(), OnMapReadyCallback {
             .show()
     }
 
+    fun onLocationChanged(location: Location) {
+        // New location has now been determined
+        val msg = "Updated Location: " +
+                java.lang.Double.toString(location.getLatitude()) + "," +
+                java.lang.Double.toString(location.getLongitude())
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+        // You can now create a LatLng Object for use with maps
+        val latLng = LatLng(location.getLatitude(), location.getLongitude())
+    }
+
+
+
+    override fun onCreateView(name: String, context: Context, attrs: AttributeSet): View? {
+
+        return super.onCreateView(name, context, attrs)
+    }
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
