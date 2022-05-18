@@ -7,6 +7,7 @@ import android.content.Intent
 import android.graphics.Camera
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
@@ -27,6 +28,11 @@ import com.example.getmymaps.models.Place
 import com.example.getmymaps.models.UserMap
 import com.google.android.gms.maps.model.Marker
 import com.google.android.material.snackbar.Snackbar
+import android.os.SystemClock
+
+import android.view.animation.BounceInterpolator
+import android.view.animation.Interpolator
+
 
 class CreateMapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -41,6 +47,7 @@ class CreateMapsActivity : AppCompatActivity(), OnMapReadyCallback {
         binding = ActivityCreateMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        //get user input from the dialogue bar
         supportActionBar?.title = intent.getStringExtra(EXTRA_MAP_TITLE)
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
@@ -96,13 +103,50 @@ class CreateMapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 Toast.makeText(this, "Enter title and description", Toast.LENGTH_LONG).show()
                 return@setOnClickListener
             }
+
             val marker = mMap.addMarker(MarkerOptions()
                 .position(latLng).title(title).snippet(description))
+            dropPinEffect(marker)
+
             markers.add(marker)
             dialog.dismiss()
         }
 
     }
+    private fun dropPinEffect(marker: Marker) {
+        // Handler allows us to repeat a code block after a specified delay
+        val handler = Handler()
+        val start = SystemClock.uptimeMillis()
+        val duration: Long = 1500
+
+        // Use the bounce interpolator
+        val interpolator: Interpolator = BounceInterpolator()
+
+        // Animate marker with a bounce updating its position every 15ms
+        handler.post(object : Runnable {
+            override fun run() {
+                val elapsed = SystemClock.uptimeMillis() - start
+                // Calculate t for bounce based on elapsed time
+                val t = Math.max(
+                    1 - interpolator.getInterpolation(
+                        elapsed.toFloat()
+                                / duration
+                    ), 0f
+                )
+                // Set the anchor
+                marker.setAnchor(0.5f, .5f + 14 * t)
+                if (t > 0.0) {
+                    // Post this event again 15ms from now.
+                    handler.postDelayed(this, 15)
+                } else { // done elapsing, show window
+                    marker.showInfoWindow()
+                }
+            }
+        })
+    }
+
+    ///end
+
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_create_map,menu)
@@ -130,6 +174,17 @@ class CreateMapsActivity : AppCompatActivity(), OnMapReadyCallback {
             finish()
             return true
         }
-        return super.onOptionsItemSelected(item)
+        if(item.itemId == R.id.map_satellite){
+            Log.i(TAG, "onOptionsItemSelected: Clicked on satillite map")
+            mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE)
+
+        }
+        if(item.itemId == R.id.map_terrain) {
+            mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN)
+        }
+        if(item.itemId == R.id.map_normal) {
+            mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL)
+        }
+            return super.onOptionsItemSelected(item)
     }
 }

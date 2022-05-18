@@ -2,4 +2,8 @@
     <string name="app_name">Get My Maps</string>
     <string name="title_activity_display_maps">DisplayMapsActivity</string>
     <string name="title_activity_create_maps">CreateMapsActivity</string>
+    <string name="save">Save</string>
+    <string name="satellite_map">Satellite Map</string>
+    <string name="terrain_map">Terrain Map</string>
+    <string name="normal_map">Normal Map</string>
 </resources>

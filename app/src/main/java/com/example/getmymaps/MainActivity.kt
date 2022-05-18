@@ -130,7 +130,7 @@ class MainActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             val intent = Intent(this@MainActivity, CreateMapsActivity::class.java)
-//            intent.putExtra(EXTRA_MAP_TITLE,"New Map Game!")
+          intent.putExtra(EXTRA_MAP_TITLE,title)
 //            startForResult.launch(intent)
             startActivityForResult(intent, REQUEST_CODE)
             dialog.dismiss()

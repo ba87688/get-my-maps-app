@@ -23,7 +23,7 @@ class MapsAdapter(val conext: Context, val userMaps : List<UserMap>, val onClick
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(conext).inflate(R.layout.item_map,parent,false)
+        val view = LayoutInflater.from(conext).inflate(R.layout.item_map_two,parent,false)
         return ViewHolder(view)
     }
 
@@ -34,7 +34,9 @@ class MapsAdapter(val conext: Context, val userMaps : List<UserMap>, val onClick
 
         }
         val textViewTitle = holder.itemView.findViewById<TextView>(R.id.tvMaptitle)
+        val textViewNumber = holder.itemView.findViewById<TextView>(R.id.tvMapNum)
         textViewTitle.text = current.title
+        textViewNumber.text = current.places.size.toString()
 
     }
 
