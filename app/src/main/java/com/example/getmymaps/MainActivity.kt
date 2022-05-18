@@ -2,40 +2,48 @@ package com.example.getmymaps
 
 import android.app.Activity
 import android.content.ContentValues.TAG
+import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuItem
+import android.widget.EditText
+import android.widget.Toast
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.getmymaps.adapter.MapsAdapter
 import com.example.getmymaps.databinding.ActivityMainBinding
 import com.example.getmymaps.models.Place
 import com.example.getmymaps.models.UserMap
-import java.io.Serializable
+import com.google.android.gms.maps.model.MarkerOptions
+import java.io.*
 
 const val EXTRA_USER_MAP = "EXTRA_USER_MAP"
 const val EXTRA_MAP_TITLE = "EXTRA_MAP_TITLE"
 const val TITLE_STRING = "TITLE_STRING"
 private const val REQUEST_CODE = 1234
+private const val FILENAME = "UserMaps.data"
 class MainActivity : AppCompatActivity() {
     private lateinit var binding : ActivityMainBinding
+    private lateinit var userMaps: MutableList<UserMap>
+    private lateinit var mapAdapter: MapsAdapter
 
-    //startactivityforresults alternative
-    val startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult(),
-        ActivityResultCallback { result ->
-            if(result!=null && result.resultCode == RESULT_OK){
-                if(result.data != null ){
 
-                }
-
-            }
-
-        })
+//    //startactivityforresults alternative
+//    val startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult(),
+//        ActivityResultCallback { result ->
+//            if(result!=null && result.resultCode == RESULT_OK){
+//                if(result.data != null ){
+//
+//                }
+//
+//            }
+//
+//        })
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,12 +51,14 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        //read data from file and add them to the list
+        userMaps = deserializeUserMaps(this).toMutableList()
 
-        val userMaps = generateSampleData()
+
         //layout manager of the recyclerview
         binding.rvMaps.layoutManager = LinearLayoutManager(this)
         // adapter for the recyclerview
-        binding.rvMaps.adapter = MapsAdapter(this, userMaps, object : MapsAdapter.OnClickListener {
+        mapAdapter= MapsAdapter(this, userMaps, object : MapsAdapter.OnClickListener {
             override fun onItemClick(position: Int) {
                 Log.i(TAG, "onItemClick in main: $position")
                 val intent = Intent(this@MainActivity, DisplayMapsActivity::class.java)
@@ -57,16 +67,13 @@ class MainActivity : AppCompatActivity() {
 
             }
 
-        }
+        })
+        binding.rvMaps.adapter =mapAdapter
 
-        )
 
         binding.fabCreateMap.setOnClickListener{
             Log.i(TAG, "onCreate: TAPPING ON FAB")
-            val intent = Intent(this@MainActivity, CreateMapsActivity::class.java)
-            intent.putExtra(EXTRA_MAP_TITLE,"New Map Game!")
-//            startForResult.launch(intent)
-            startActivityForResult(intent, REQUEST_CODE)
+            showAlertDialog()
 
         }
     }
@@ -76,9 +83,60 @@ class MainActivity : AppCompatActivity() {
         if(requestCode== REQUEST_CODE && resultCode == Activity.RESULT_OK){
             var userMap = data?.getSerializableExtra(EXTRA_USER_MAP) as UserMap
             Log.i(TAG, "onActivityResult: ${userMap.title}")
+            userMaps.add(userMap)
+            mapAdapter.notifyItemInserted(userMaps.size -1)
+            serializeUserMaps(this, userMaps)
         }
         super.onActivityResult(requestCode, resultCode, data)
     }
+    private fun getDataFile(context: Context): File {
+        Log.i(TAG, "getDataFile: ${context.filesDir}")
+        return File(context.filesDir, FILENAME)
+
+    }
+    private fun serializeUserMaps(context: Context,userMap:List<UserMap>){
+        Log.i(TAG, "serializeUserMaps: writing")
+        ObjectOutputStream(FileOutputStream(getDataFile(context))).use {
+            it.writeObject(userMap)
+        }
+
+    }
+    private fun deserializeUserMaps(context: Context):List<UserMap>{
+        Log.i(TAG, "deserializeUserMaps: ")
+        val dataFile = getDataFile(context )
+        if(!dataFile.exists()){
+            Log.i(TAG, "data files does not exist yet")
+            return emptyList()
+        }
+        ObjectInputStream(FileInputStream(dataFile)).use {
+            return it.readObject() as List<UserMap>
+        }
+    }
+
+    private fun showAlertDialog() {
+        val mapFormView = LayoutInflater.from(this).inflate(R.layout.dialog_create_title,null)
+
+        val dialog = AlertDialog.Builder(this).setTitle("create a marker")
+            .setView(mapFormView)
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("OK", null)
+            .show()
+
+        dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+            val title = mapFormView.findViewById<EditText>(R.id.edit_text_title).text.toString()
+            if(title.trim().isEmpty()){
+                Toast.makeText(this, "Enter title and description", Toast.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
+            val intent = Intent(this@MainActivity, CreateMapsActivity::class.java)
+//            intent.putExtra(EXTRA_MAP_TITLE,"New Map Game!")
+//            startForResult.launch(intent)
+            startActivityForResult(intent, REQUEST_CODE)
+            dialog.dismiss()
+        }
+
+    }
+
 
 }
 
@@ -125,4 +183,6 @@ private fun generateSampleData(): List<UserMap> {
             )
         )
     )
+
+
 }

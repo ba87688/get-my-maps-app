@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.ContentValues.TAG
 import android.content.DialogInterface
 import android.content.Intent
+import android.graphics.Camera
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -74,9 +75,9 @@ class CreateMapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         }
         // Add a marker in Sydney and move the camera
-        val sydney = LatLng(-34.0, 151.0)
-        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+        val sydney = LatLng(37.4, -122.1)
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 10f))
+
     }
 
     private fun showAlertDialog(latLng: LatLng) {
