@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.getmymaps.R
 import com.example.getmymaps.models.UserMap
 
 private const val TAG = "MapsAdapter"
@@ -22,7 +23,7 @@ class MapsAdapter(val conext: Context, val userMaps : List<UserMap>, val onClick
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(conext).inflate(android.R.layout.simple_list_item_1,parent,false)
+        val view = LayoutInflater.from(conext).inflate(R.layout.item_map,parent,false)
         return ViewHolder(view)
     }
 
@@ -32,7 +33,7 @@ class MapsAdapter(val conext: Context, val userMaps : List<UserMap>, val onClick
             onClickListener.onItemClick(position)
 
         }
-        val textViewTitle = holder.itemView.findViewById<TextView>(android.R.id.text1)
+        val textViewTitle = holder.itemView.findViewById<TextView>(R.id.tvMaptitle)
         textViewTitle.text = current.title
 
     }
