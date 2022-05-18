@@ -41,6 +41,7 @@ import android.view.animation.Interpolator
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices.getFusedLocationProviderClient
 import androidx.annotation.NonNull
+import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
 
 import com.google.android.gms.tasks.OnFailureListener
@@ -227,7 +228,25 @@ class CreateMapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_create_map,menu)
-        return super.onCreateOptionsMenu(menu)
+        val me =super.onCreateOptionsMenu(menu)
+
+//        var searchItem: SearchView = menu?.findItem(R.id.action_search)?.actionView as SearchView
+////        var searchItem: SearchView = findViewById(R.id.action_search)
+//        searchItem.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
+//            override fun onQueryTextSubmit(query: String?): Boolean {
+//                Log.i(TAG, "onQueryTextSubmit: HELLO FROM SERACH")
+//                TODO("Not yet implemented")
+//            }
+//
+//            override fun onQueryTextChange(newText: String?): Boolean {
+//                Log.i(TAG, "onQueryTextSubmit: HELLO FROM SERACH3")
+//
+//                TODO("Not yet implemented")
+//            }
+//
+//        })
+        return me
+
 
     }
 
@@ -262,6 +281,10 @@ class CreateMapsActivity : AppCompatActivity(), OnMapReadyCallback {
         if(item.itemId == R.id.map_normal) {
             mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL)
         }
+        if(item.itemId==R.id.action_search){
+
+        }
+
             return super.onOptionsItemSelected(item)
     }
 }

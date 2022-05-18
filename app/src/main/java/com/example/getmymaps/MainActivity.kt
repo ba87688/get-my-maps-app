@@ -9,11 +9,13 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
 import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.getmymaps.adapter.MapsAdapter
 import com.example.getmymaps.databinding.ActivityMainBinding
@@ -80,6 +82,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if(requestCode== REQUEST_CODE && resultCode == Activity.RESULT_OK){
             var userMap = data?.getSerializableExtra(EXTRA_USER_MAP) as UserMap
@@ -138,6 +141,30 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_page_items,menu)
+val me =super.onCreateOptionsMenu(menu)
+
+
+
+
+        var searchItem: SearchView = menu?.findItem(R.id.action_search)?.actionView as SearchView
+//        var searchItem: SearchView = findViewById(R.id.action_search)
+        searchItem.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                Log.i(TAG, "onQueryTextSubmit: HELLO FROM SERACH")
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                Log.i(TAG, "onQueryTextSubmit: HELLO FROM SERACH3")
+                mapAdapter.filter.filter(newText)
+                return true
+            }
+
+        })
+        return me
+    }
 
 }
 
