@@ -60,7 +60,8 @@ class DisplayMapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         }
         // Add a marker in Sydney and move the camera
-        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(),1000,1000,0))
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(),10))
 
     }
 }

@@ -39,14 +39,9 @@ import android.view.View
 import android.view.animation.BounceInterpolator
 import android.view.animation.Interpolator
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices.getFusedLocationProviderClient
-import androidx.annotation.NonNull
-import androidx.appcompat.widget.SearchView
+
 import androidx.core.app.ActivityCompat
-
-import com.google.android.gms.tasks.OnFailureListener
-
-import com.google.android.gms.tasks.OnSuccessListener
+import com.google.android.gms.location.LocationServices
 
 
 
@@ -56,6 +51,12 @@ class CreateMapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityCreateMapsBinding
+    private lateinit var lastLocation:Location
+    private lateinit var fusedLocationClient:FusedLocationProviderClient
+
+    companion object{
+        private const val LOCATION_REQUEST_CODE =1
+    }
 
     private var markers: MutableList<Marker> = mutableListOf()
 
@@ -65,22 +66,19 @@ class CreateMapsActivity : AppCompatActivity(), OnMapReadyCallback {
         binding = ActivityCreateMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        fusedLocationClient=LocationServices.getFusedLocationProviderClient(this)
         binding.currentLocationFab.setOnClickListener { it->
             Log.i(TAG, "onCreateView: you clicked on my current location")
-            val locationClient: FusedLocationProviderClient = getFusedLocationProviderClient(this)
 
 
             //CHECING IF PERMISSSIONS ARE GRANTED.
             if (ActivityCompat.checkSelfPermission(
                     this,
                     Manifest.permission.ACCESS_FINE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
+                ) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),
+                        LOCATION_REQUEST_CODE)
+
                 // here to request the missing permissions, and then overriding
                 //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
                 //                                          int[] grantResults)
@@ -88,23 +86,25 @@ class CreateMapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 // for ActivityCompat#requestPermissions for more details.
                 return@setOnClickListener
             }
+            mMap.isMyLocationEnabled=true
             //if permission are given, get location.
-            locationClient.lastLocation
-                .addOnSuccessListener { location -> // GPS location can be null if GPS is switched off
-                    location?.let { it->
-                        Log.i(TAG, "onCreate: THE LOCATION IS: $it" )
-                        val lat = it.latitude
-                        val log = it.longitude
-                        val pos = LatLng(lat, log)
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(pos,10f))
-                        onLocationChanged(it) }
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener (){ location -> // GPS location can be null if GPS is switched off
+
+                    if(location!=null){
+                        lastLocation=location
+                        val currentLatLong = LatLng(location.altitude,location.longitude)
+                        placeMarker(currentLatLong)
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLong,12f))
+
+                    }
+
                 }
                 .addOnFailureListener { e ->
                     Log.d("MapDemoActivity", "Error trying to get last GPS location")
                     e.printStackTrace()
                 }
 
-            Log.i(TAG, "onCreate: $locationClient")
 
 
             //END OF FAB
@@ -120,6 +120,12 @@ class CreateMapsActivity : AppCompatActivity(), OnMapReadyCallback {
             .setAction("OK",{})
             .setActionTextColor(ContextCompat.getColor(this,android.R.color.white))
             .show()
+    }
+
+    private fun placeMarker(currentLatLong: LatLng) {
+        val markerOptions = MarkerOptions().position(currentLatLong)
+        markerOptions.title("$currentLatLong")
+        mMap.addMarker(markerOptions)
     }
 
     fun onLocationChanged(location: Location) {
@@ -170,7 +176,7 @@ class CreateMapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         val dialog = AlertDialog.Builder(this).setTitle("create a marker")
             .setView(placeFormView)
-            .setMessage("hello").setNegativeButton("Cancel", null)
+            .setMessage("").setNegativeButton("Cancel", null)
             .setPositiveButton("OK", null)
             .show()
 
@@ -235,13 +241,11 @@ class CreateMapsActivity : AppCompatActivity(), OnMapReadyCallback {
 //        searchItem.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
 //            override fun onQueryTextSubmit(query: String?): Boolean {
 //                Log.i(TAG, "onQueryTextSubmit: HELLO FROM SERACH")
-//                TODO("Not yet implemented")
 //            }
 //
 //            override fun onQueryTextChange(newText: String?): Boolean {
 //                Log.i(TAG, "onQueryTextSubmit: HELLO FROM SERACH3")
 //
-//                TODO("Not yet implemented")
 //            }
 //
 //        })
@@ -280,9 +284,6 @@ class CreateMapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         if(item.itemId == R.id.map_normal) {
             mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL)
-        }
-        if(item.itemId==R.id.action_search){
-
         }
 
             return super.onOptionsItemSelected(item)

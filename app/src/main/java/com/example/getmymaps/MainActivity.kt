@@ -53,9 +53,18 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        //read data from file and add them to the list
-        userMaps = deserializeUserMaps(this).toMutableList()
 
+
+
+//
+//        val userMapsFromFile = deserializeUserMaps(this)
+//        userMaps = generateSampleData().toMutableList()
+//        userMaps.addAll(userMapsFromFile)
+
+        //read data from file and add them to the list
+//        userMaps = deserializeUserMaps().toMutableList()
+
+        userMaps = deserializeUserMaps(this).toMutableList()
 
         //layout manager of the recyclerview
         binding.rvMaps.layoutManager = LinearLayoutManager(this)
@@ -95,7 +104,8 @@ class MainActivity : AppCompatActivity() {
     }
     private fun getDataFile(context: Context): File {
         Log.i(TAG, "getDataFile: ${context.filesDir}")
-        return File(context.filesDir, FILENAME)
+        val file= File(context.filesDir, FILENAME)
+        return file
 
     }
     private fun serializeUserMaps(context: Context,userMap:List<UserMap>){
@@ -143,7 +153,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.main_page_items,menu)
-val me =super.onCreateOptionsMenu(menu)
+        val me =super.onCreateOptionsMenu(menu)
 
 
 
